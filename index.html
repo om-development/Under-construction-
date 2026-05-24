@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DHAKAL19</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #f5f0e8;
+      color: #0d0d0d;
+      font-family: 'IBM Plex Mono', monospace;
+      overflow: hidden;
+    }
+
+    /* grid overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 0;
+    }
+
+    /* top bar */
+    .topbar {
+      border-bottom: 3px solid #0d0d0d;
+      display: flex;
+      align-items: stretch;
+      height: 52px;
+      overflow: hidden;
+    }
+
+    .topbar-left {
+      border-right: 3px solid #0d0d0d;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .ticker-wrap {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .ticker {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      white-space: nowrap;
+      animation: ticker 20s linear infinite;
+      color: #555;
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* center stage */
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 0 clamp(24px, 6vw, 80px);
+    }
+
+    .issue-tag {
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .name-wrap {
+      position: relative;
+      line-height: 0.88;
+    }
+
+    .name {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(72px, 18vw, 220px);
+      letter-spacing: -0.02em;
+      color: #0d0d0d;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* big outline behind */
+    .name-outline {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(72px, 18vw, 220px);
+      letter-spacing: -0.02em;
+      color: transparent;
+      -webkit-text-stroke: 2px #0d0d0d;
+      display: block;
+      position: absolute;
+      top: 6px; left: 6px;
+      z-index: 0;
+      opacity: 0.15;
+    }
+
+    .sub-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 1.5rem;
+    }
+
+    .badge {
+      background: #0d0d0d;
+      color: #f5f0e8;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      padding: 6px 14px;
+      text-transform: uppercase;
+    }
+
+    .sub-text {
+      font-size: 11px;
+      color: #888;
+      letter-spacing: 0.1em;
+    }
+
+    /* progress */
+    .prog-wrap {
+      margin-top: 2rem;
+      width: min(420px, 80vw);
+    }
+
+    .prog-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
+
+    .bar-bg {
+      height: 4px;
+      background: #ddd;
+      width: 100%;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0;
+      background: #0d0d0d;
+      animation: load 3s cubic-bezier(0.4,0,0.2,1) 0.5s forwards;
+    }
+    @keyframes load { to { width: 12%; } }
+
+    /* bottom bar */
+    .bottombar {
+      border-top: 3px solid #0d0d0d;
+      display: flex;
+      align-items: stretch;
+      height: 44px;
+    }
+
+    .bottombar-cell {
+      border-right: 1px solid rgba(0,0,0,0.15);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #aaa;
+    }
+
+    .bottombar-cell:last-child { border-right: none; }
+    .bottombar-cell.active { color: #0d0d0d; }
+
+    /* animated underline on name */
+    .name-wrap {
+      overflow: hidden;
+    }
+
+    .name {
+      animation: slide-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes slide-in {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .center > * {
+      opacity: 0;
+      animation: fade-up 0.6s ease forwards;
+    }
+    .issue-tag { animation-delay: 0.1s; }
+    .name-wrap  { animation-delay: 0.3s; }
+    .sub-row    { animation-delay: 0.5s; }
+    .prog-wrap  { animation-delay: 0.7s; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="topbar-left">Portfolio — Vol. 01</div>
+      <div class="ticker-wrap">
+        <div class="ticker">
+          UNDER CONSTRUCTION &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+          SOMETHING IS BEING BUILT &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+          COME BACK SOON &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+          UNDER CONSTRUCTION &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+          SOMETHING IS BEING BUILT &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+          COME BACK SOON &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+          UNDER CONSTRUCTION &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+          SOMETHING IS BEING BUILT &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+          COME BACK SOON &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+        </div>
+      </div>
+    </div>
+
+    <div class="center">
+      <div class="issue-tag">Under Construction</div>
+      <div class="name-wrap">
+        <span class="name-outline" aria-hidden="true">DHAKAL19</span>
+        <span class="name">DHAKAL19</span>
+      </div>
+      <div class="sub-row">
+        <span class="badge">Building</span>
+        <span class="sub-text">Check back later.</span>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-meta"><span>Progress</span><span>12%</span></div>
+        <div class="bar-bg"><div class="bar-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="bottombar">
+      <div class="bottombar-cell active">DHAKAL19</div>
+      <div class="bottombar-cell">Status: Building</div>
+      <div class="bottombar-cell">ETA: Soon</div>
+    </div>
+  </div>
+</body>
+  </html>
+  
