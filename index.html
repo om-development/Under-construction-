@@ -8,26 +8,75 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      height: 100%;
-      background: #f5f0e8;
-      color: #0d0d0d;
-      font-family: 'IBM Plex Mono', monospace;
-      overflow: hidden;
+    /* ── Theme variables ── */
+    :root {
+      --bg:      #f5f0e8;
+      --ink:     #0d0d0d;
+      --ink-mid: #555;
+      --ink-muted: #888;
+      --ink-faint: #aaa;
+      --ink-ghost: #ccc;
+      --bar-bg:  #ddd;
+      --grid-line: rgba(0,0,0,0.04);
+      --border-soft: rgba(0,0,0,0.15);
+      --sep-line: #e0e0e0;
     }
 
-    /* grid overlay */
+    body.dark {
+      --bg:      #0d0d0d;
+      --ink:     #f5f0e8;
+      --ink-mid: #aaa;
+      --ink-muted: #777;
+      --ink-faint: #555;
+      --ink-ghost: #333;
+      --bar-bg:  #222;
+      --grid-line: rgba(255,255,255,0.04);
+      --border-soft: rgba(255,255,255,0.12);
+      --sep-line: #1e1e1e;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'IBM Plex Mono', monospace;
+      overflow: hidden;
+      cursor: none;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 48px 48px;
       pointer-events: none;
       z-index: 0;
+      transition: background-image 0.4s;
     }
+
+    /* ── Custom cursor ── */
+    #cursor {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+    #cursor line, #cursor rect { stroke: var(--ink); transition: stroke 0.4s; }
+    #cursor-dot {
+      position: fixed;
+      width: 6px; height: 6px;
+      background: var(--ink);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, background 0.4s;
+    }
+    #cursor-dot.clicked { transform: translate(-50%, -50%) scale(2.5); }
 
     .page {
       position: relative;
@@ -35,20 +84,20 @@
       height: 100vh;
       display: grid;
       grid-template-rows: auto 1fr auto;
-      padding: 0;
     }
 
-    /* top bar */
+    /* ── Topbar ── */
     .topbar {
-      border-bottom: 3px solid #0d0d0d;
+      border-bottom: 3px solid var(--ink);
       display: flex;
       align-items: stretch;
       height: 52px;
       overflow: hidden;
+      transition: border-color 0.4s;
     }
 
     .topbar-left {
-      border-right: 3px solid #0d0d0d;
+      border-right: 3px solid var(--ink);
       padding: 0 20px;
       display: flex;
       align-items: center;
@@ -57,29 +106,64 @@
       text-transform: uppercase;
       white-space: nowrap;
       flex-shrink: 0;
+      transition: border-color 0.4s;
     }
 
-    .ticker-wrap {
-      flex: 1;
-      overflow: hidden;
+    /* dark mode toggle button */
+    #theme-btn {
+      border-left: 3px solid var(--ink);
+      padding: 0 20px;
       display: flex;
       align-items: center;
+      gap: 8px;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      background: none;
+      border-top: none;
+      border-right: none;
+      border-bottom: none;
+      color: var(--ink);
+      cursor: none;
+      flex-shrink: 0;
+      transition: border-color 0.4s, color 0.4s, background 0.15s;
+      font-family: 'IBM Plex Mono', monospace;
     }
+    #theme-btn:hover { background: var(--ink); color: var(--bg); }
 
+    .toggle-track {
+      width: 28px; height: 14px;
+      border: 1.5px solid currentColor;
+      border-radius: 7px;
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 1px; left: 1px;
+      width: 8px; height: 8px;
+      background: currentColor;
+      border-radius: 50%;
+      transition: transform 0.3s cubic-bezier(0.23,1,0.32,1);
+    }
+    body.dark .toggle-thumb { transform: translateX(14px); }
+
+    .ticker-wrap { flex: 1; overflow: hidden; display: flex; align-items: center; }
     .ticker {
       font-size: 10px;
       letter-spacing: 0.2em;
       white-space: nowrap;
       animation: ticker 20s linear infinite;
-      color: #555;
+      color: var(--ink-mid);
+      transition: color 0.4s;
     }
-
     @keyframes ticker {
       from { transform: translateX(0); }
       to   { transform: translateX(-50%); }
     }
 
-    /* center stage */
+    /* ── Center ── */
     .center {
       display: flex;
       flex-direction: column;
@@ -92,120 +176,43 @@
       font-size: 10px;
       letter-spacing: 0.35em;
       text-transform: uppercase;
-      color: #888;
+      color: var(--ink-muted);
       margin-bottom: 1rem;
+      transition: color 0.4s;
     }
 
     .name-wrap {
       position: relative;
       line-height: 0.88;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
     }
 
     .name {
       font-family: 'Anton', sans-serif;
       font-size: clamp(72px, 18vw, 220px);
       letter-spacing: -0.02em;
-      color: #0d0d0d;
+      color: var(--ink);
       display: block;
       position: relative;
       z-index: 1;
+      animation: slide-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1), color 0.4s;
+      will-change: transform;
     }
 
-    /* big outline behind */
     .name-outline {
       font-family: 'Anton', sans-serif;
       font-size: clamp(72px, 18vw, 220px);
       letter-spacing: -0.02em;
       color: transparent;
-      -webkit-text-stroke: 2px #0d0d0d;
+      -webkit-text-stroke: 2px var(--ink);
       display: block;
       position: absolute;
       top: 6px; left: 6px;
       z-index: 0;
       opacity: 0.15;
-    }
-
-    .sub-row {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-top: 1.5rem;
-    }
-
-    .badge {
-      background: #0d0d0d;
-      color: #f5f0e8;
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      padding: 6px 14px;
-      text-transform: uppercase;
-    }
-
-    .sub-text {
-      font-size: 11px;
-      color: #888;
-      letter-spacing: 0.1em;
-    }
-
-    /* progress */
-    .prog-wrap {
-      margin-top: 2rem;
-      width: min(420px, 80vw);
-    }
-
-    .prog-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 9px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #aaa;
-      margin-bottom: 8px;
-    }
-
-    .bar-bg {
-      height: 4px;
-      background: #ddd;
-      width: 100%;
-      position: relative;
-    }
-    .bar-fill {
-      height: 100%;
-      width: 0;
-      background: #0d0d0d;
-      animation: load 3s cubic-bezier(0.4,0,0.2,1) 0.5s forwards;
-    }
-    @keyframes load { to { width: 12%; } }
-
-    /* bottom bar */
-    .bottombar {
-      border-top: 3px solid #0d0d0d;
-      display: flex;
-      align-items: stretch;
-      height: 44px;
-    }
-
-    .bottombar-cell {
-      border-right: 1px solid rgba(0,0,0,0.15);
-      padding: 0 20px;
-      display: flex;
-      align-items: center;
-      font-size: 9px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #aaa;
-    }
-
-    .bottombar-cell:last-child { border-right: none; }
-    .bottombar-cell.active { color: #0d0d0d; }
-
-    /* animated underline on name */
-    .name-wrap {
-      overflow: hidden;
-    }
-
-    .name {
-      animation: slide-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), -webkit-text-stroke-color 0.4s;
     }
 
     @keyframes slide-in {
@@ -213,22 +220,198 @@
       to   { transform: translateY(0); opacity: 1; }
     }
 
+    .sub-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge {
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      padding: 6px 14px;
+      text-transform: uppercase;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    .sub-text {
+      font-size: 11px;
+      color: var(--ink-muted);
+      letter-spacing: 0.1em;
+      transition: color 0.4s;
+    }
+
+    /* ── Timer ── */
+    .timer-block {
+      border: 3px solid var(--ink);
+      padding: 20px 28px;
+      margin-bottom: 1.5rem;
+      width: min(520px, 90vw);
+      transition: border-color 0.4s;
+    }
+
+    .timer-label {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 14px;
+      transition: color 0.4s;
+    }
+
+    .timer-digits { display: flex; align-items: flex-end; }
+    .t-unit { display: flex; flex-direction: column; align-items: center; }
+
+    .t-num {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(32px, 7vw, 64px);
+      line-height: 1;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      min-width: 2ch;
+      text-align: center;
+      transition: color 0.4s;
+    }
+
+    .t-sub {
+      font-size: 8px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-top: 6px;
+      transition: color 0.4s;
+    }
+
+    .t-sep {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(32px, 7vw, 64px);
+      color: var(--ink-ghost);
+      padding: 0 8px;
+      line-height: 1;
+      margin-bottom: 14px;
+      transition: color 0.4s;
+    }
+
+    .total-sec {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--ink-faint);
+      margin-top: 12px;
+      border-top: 1px solid var(--sep-line);
+      padding-top: 10px;
+      transition: color 0.4s, border-color 0.4s;
+    }
+    .total-sec span { color: var(--ink-mid); transition: color 0.4s; }
+
+    /* ── Progress ── */
+    .prog-wrap { width: min(520px, 90vw); }
+    .prog-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 8px;
+      transition: color 0.4s;
+    }
+    .bar-bg { height: 4px; background: var(--bar-bg); width: 100%; transition: background 0.4s; }
+    .bar-fill { height: 100%; width: 0%; background: var(--ink); transition: width 1s linear, background 0.4s; }
+
+    /* ── Bottom bar ── */
+    .bottombar {
+      border-top: 3px solid var(--ink);
+      display: flex;
+      align-items: stretch;
+      height: 44px;
+      transition: border-color 0.4s;
+    }
+
+    .bottombar-cell {
+      border-right: 1px solid var(--border-soft);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      transition: color 0.4s, border-color 0.4s;
+    }
+    .bottombar-cell:last-child { border-right: none; }
+    .bottombar-cell.active { color: var(--ink); }
+
+    /* ── Entrance animations ── */
     .center > * {
       opacity: 0;
       animation: fade-up 0.6s ease forwards;
     }
-    .issue-tag { animation-delay: 0.1s; }
-    .name-wrap  { animation-delay: 0.3s; }
-    .sub-row    { animation-delay: 0.5s; }
-    .prog-wrap  { animation-delay: 0.7s; }
+    .issue-tag   { animation-delay: 0.1s; }
+    .name-wrap   { animation-delay: 0.3s; }
+    .sub-row     { animation-delay: 0.5s; }
+    .timer-block { animation-delay: 0.65s; }
+    .prog-wrap   { animation-delay: 0.8s; }
 
     @keyframes fade-up {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
+    /* ── Ink splat ── */
+    .splat { position: fixed; pointer-events: none; z-index: 9000; transform: translate(-50%, -50%); }
+    .splat-piece { position: absolute; background: var(--ink); transform-origin: center; border-radius: 50%; transition: background 0.4s; }
+
+    .ripple {
+      position: fixed; pointer-events: none; z-index: 8999;
+      border: 2px solid var(--ink); border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      animation: ripple-out 0.6s ease-out forwards;
+    }
+    @keyframes ripple-out { to { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
+
+    .click-label {
+      position: fixed; pointer-events: none; z-index: 9001;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--ink);
+      transform: translate(-50%, -200%);
+      animation: label-float 0.8s ease-out forwards;
+      white-space: nowrap;
+    }
+    @keyframes label-float {
+      0%   { opacity: 1; transform: translate(-50%, -200%); }
+      100% { opacity: 0; transform: translate(-50%, -400%); }
+    }
+
+    /* ── Theme flash on toggle ── */
+    .theme-flash {
+      position: fixed; inset: 0; z-index: 8000;
+      background: var(--ink);
+      pointer-events: none;
+      animation: flash-out 0.35s ease forwards;
+    }
+    @keyframes flash-out {
+      from { opacity: 0.18; }
+      to   { opacity: 0; }
+    }
   </style>
 </head>
 <body>
+
+  <div id="cursor">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="16" y1="0" x2="16" y2="10" stroke-width="2"/>
+      <line x1="16" y1="22" x2="16" y2="32" stroke-width="2"/>
+      <line x1="0" y1="16" x2="10" y2="16" stroke-width="2"/>
+      <line x1="22" y1="16" x2="32" y2="16" stroke-width="2"/>
+      <rect x="13" y="13" width="6" height="6" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+  <div id="cursor-dot"></div>
+
   <div class="page">
     <div class="topbar">
       <div class="topbar-left">Portfolio — Vol. 01</div>
@@ -245,30 +428,195 @@
           COME BACK SOON &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
         </div>
       </div>
+      <button id="theme-btn" aria-label="Toggle dark mode">
+        <span id="theme-label">DARK</span>
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+      </button>
     </div>
 
     <div class="center">
       <div class="issue-tag">Under Construction</div>
-      <div class="name-wrap">
-        <span class="name-outline" aria-hidden="true">DHAKAL19</span>
-        <span class="name">DHAKAL19</span>
+      <div class="name-wrap" id="name-wrap">
+        <span class="name-outline" aria-hidden="true" id="name-outline">DHAKAL19</span>
+        <span class="name" id="name-text">DHAKAL19</span>
       </div>
       <div class="sub-row">
         <span class="badge">Building</span>
         <span class="sub-text">Check back later.</span>
       </div>
+
+      <div class="timer-block">
+        <div class="timer-label">Launching in</div>
+        <div class="timer-digits">
+          <div class="t-unit"><span class="t-num" id="t-days">00</span><span class="t-sub">Days</span></div>
+          <span class="t-sep">:</span>
+          <div class="t-unit"><span class="t-num" id="t-hrs">00</span><span class="t-sub">Hours</span></div>
+          <span class="t-sep">:</span>
+          <div class="t-unit"><span class="t-num" id="t-min">00</span><span class="t-sub">Mins</span></div>
+          <span class="t-sep">:</span>
+          <div class="t-unit"><span class="t-num" id="t-sec">00</span><span class="t-sub">Secs</span></div>
+        </div>
+        <div class="total-sec">Total seconds remaining: <span id="t-total">—</span></div>
+      </div>
+
       <div class="prog-wrap">
-        <div class="prog-meta"><span>Progress</span><span>12%</span></div>
-        <div class="bar-bg"><div class="bar-fill"></div></div>
+        <div class="prog-meta"><span>Progress</span><span id="t-pct">0%</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="t-bar"></div></div>
       </div>
     </div>
 
     <div class="bottombar">
       <div class="bottombar-cell active">DHAKAL19</div>
       <div class="bottombar-cell">Status: Building</div>
-      <div class="bottombar-cell">ETA: Soon</div>
+      <div class="bottombar-cell" id="eta-cell">ETA: —</div>
     </div>
   </div>
+
+  <script>
+    /* ── Theme toggle ── */
+    const body       = document.body;
+    const themeBtn   = document.getElementById('theme-btn');
+    const themeLabel = document.getElementById('theme-label');
+
+    const saved = localStorage.getItem('dhakal19-theme');
+    if (saved === 'dark') { body.classList.add('dark'); themeLabel.textContent = 'LIGHT'; }
+
+    themeBtn.addEventListener('click', () => {
+      const isDark = body.classList.toggle('dark');
+      themeLabel.textContent = isDark ? 'LIGHT' : 'DARK';
+      localStorage.setItem('dhakal19-theme', isDark ? 'dark' : 'light');
+      const flash = document.createElement('div');
+      flash.className = 'theme-flash';
+      document.body.appendChild(flash);
+      setTimeout(() => flash.remove(), 400);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key.toLowerCase() === 'd' && !e.ctrlKey && !e.metaKey) themeBtn.click();
+    });
+
+    /* ── Countdown ── */
+    const TOTAL_SECS = 100 * 24 * 60 * 60;
+    let stored = localStorage.getItem('dhakal19-end');
+    if (!stored) {
+      stored = Date.now() + TOTAL_SECS * 1000;
+      localStorage.setItem('dhakal19-end', stored);
+    }
+    const END = parseInt(stored, 10);
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function tick() {
+      const now = Date.now();
+      let rem = Math.max(0, Math.floor((END - now) / 1000));
+      const d = Math.floor(rem / 86400); rem -= d * 86400;
+      const h = Math.floor(rem / 3600);  rem -= h * 3600;
+      const m = Math.floor(rem / 60);    rem -= m * 60;
+      const s = rem;
+      document.getElementById('t-days').textContent = pad(d);
+      document.getElementById('t-hrs').textContent  = pad(h);
+      document.getElementById('t-min').textContent  = pad(m);
+      document.getElementById('t-sec').textContent  = pad(s);
+      const totalRem = Math.max(0, Math.floor((END - now) / 1000));
+      document.getElementById('t-total').textContent = totalRem.toLocaleString();
+      const elapsed = TOTAL_SECS - totalRem;
+      const pct = Math.min(100, (elapsed / TOTAL_SECS * 100)).toFixed(1);
+      document.getElementById('t-pct').textContent = pct + '%';
+      document.getElementById('t-bar').style.width = pct + '%';
+      document.getElementById('eta-cell').textContent = 'ETA: ' + d + 'd ' + pad(h) + 'h';
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    /* ── Custom cursor ── */
+    const cursor    = document.getElementById('cursor');
+    const cursorDot = document.getElementById('cursor-dot');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left    = e.clientX + 'px';
+      cursor.style.top     = e.clientY + 'px';
+      cursorDot.style.left = e.clientX + 'px';
+      cursorDot.style.top  = e.clientY + 'px';
+      magnetName(e.clientX, e.clientY);
+    });
+
+    /* ── Magnetic name ── */
+    const nameEl    = document.getElementById('name-text');
+    const outlineEl = document.getElementById('name-outline');
+    const nameWrap  = document.getElementById('name-wrap');
+    function magnetName(x, y) {
+      const rect = nameWrap.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top  + rect.height / 2;
+      const dx = x - cx, dy = y - cy;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const radius = 320;
+      if (dist < radius) {
+        const pull = (1 - dist / radius) * 18;
+        const tx = (dx / dist) * pull;
+        const ty = (dy / dist) * pull;
+        nameEl.style.transform    = `translate(${tx}px, ${ty}px)`;
+        outlineEl.style.transform = `translate(${tx * 1.6}px, ${ty * 1.6}px)`;
+      } else {
+        nameEl.style.transform    = '';
+        outlineEl.style.transform = '';
+      }
+    }
+
+    /* ── Ink splat on click ── */
+    const labels = ['NOTED', 'SOON', 'WATCH THIS', 'BUILDING', '...', 'STAY TUNED', 'DHAKAL19'];
+    let clickCount = 0;
+
+    document.addEventListener('click', e => {
+      if (e.target === themeBtn || themeBtn.contains(e.target)) return;
+      spawnSplat(e.clientX, e.clientY);
+      spawnRipple(e.clientX, e.clientY);
+      spawnLabel(e.clientX, e.clientY);
+      cursorDot.classList.add('clicked');
+      setTimeout(() => cursorDot.classList.remove('clicked'), 150);
+      clickCount++;
+    });
+
+    function spawnRipple(x, y) {
+      const size = 60 + Math.random() * 60;
+      const el = document.createElement('div');
+      el.className = 'ripple';
+      el.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 700);
+    }
+
+    function spawnLabel(x, y) {
+      const el = document.createElement('div');
+      el.className = 'click-label';
+      el.textContent = labels[clickCount % labels.length];
+      el.style.cssText = `left:${x}px;top:${y}px;`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 900);
+    }
+
+    function spawnSplat(x, y) {
+      const count = 8 + Math.floor(Math.random() * 8);
+      const container = document.createElement('div');
+      container.className = 'splat';
+      container.style.cssText = `left:${x}px;top:${y}px;`;
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'splat-piece';
+        const angle  = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+        const speed  = 40 + Math.random() * 80;
+        const size   = 3 + Math.random() * 8;
+        const scaleX = 0.4 + Math.random() * 1.2;
+        const scaleY = 0.4 + Math.random() * 1.2;
+        const tx = Math.cos(angle) * speed;
+        const ty = Math.sin(angle) * speed;
+        piece.style.cssText = `width:${size}px;height:${size}px;left:0;top:0;transform:translate(0,0) scale(1);transition:transform ${0.35+Math.random()*0.25}s cubic-bezier(0.22,1,0.36,1),opacity ${0.4+Math.random()*0.3}s ease 0.1s;`;
+        container.appendChild(piece);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          piece.style.transform = `translate(${tx}px,${ty}px) scale(${scaleX},${scaleY})`;
+          piece.style.opacity = '0';
+        }));
+      }
+      document.body.appendChild(container);
+      setTimeout(() => container.remove(), 900);
+    }
+  </script>
 </body>
-  </html>
-  
+</html>
