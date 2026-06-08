@@ -212,6 +212,16 @@
       .bottombar-cell { height: 44px; font-size: 8px; padding: 0 12px; }
       .bottombar-cell.morse-cell { width: 100%; border-left: none; border-top: 1px solid var(--border-soft); margin-left: 0; }
     }
+    .blog-excerpt a{
+      text-decoration: none;
+      color: grey;
+      position: absolute;
+      inset: 0;
+      
+    }
+    .blog-body-inner{
+      position: relative;
+    }
   </style>
 </head>
 <body>
@@ -293,7 +303,7 @@
           <div class="blog-row-top">
             <span class="blog-index">01</span>
             <span class="blog-title">CONSTRUCTION UPDATE #1</span>
-            <span class="blog-date">JUN 2025</span>
+            <span class="blog-date">JUN 3 2026</span>
           </div>
           <div class="blog-row-meta">
             <div style="width:32px"></div>
@@ -306,7 +316,23 @@
             </div>
           </div>
         </div>
-
+<div class="blog-row" onclick="togglePost(this)">
+          <div class="blog-row-top">
+            <span class="blog-index">02</span>
+            <span class="blog-title"> CHECK OUT MY PROJECTS ON GITHUB</span>
+            <span class="blog-date">JUN 8 2026</span>
+          </div>
+          <div class="blog-row-meta">
+            <div style="width:32px"></div>
+            <span class="blog-tag">GITHUB</span>
+            <span class="blog-arrow">&#9654;</span>
+          </div>
+          <div class="blog-body">
+            <div class="blog-body-inner">
+              <p class="blog-excerpt"><a href="https://github.com/om-development">Just Click here</a></p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
